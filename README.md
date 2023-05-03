@@ -1,2 +1,8 @@
 # flix-rosetree
-A rose tree data struture for Flix
+
+A rose-tree data structure for Flix.
+
+License: Apache 2.0
+
+
+
