@@ -51,15 +51,16 @@ mod RoseTree {
     ///
     /// Returns `true` if and only if `c1` and `c2` and equal.
     ///
-    pub def equals(t1: Tree[a], t2: Tree[a]): Bool with Eq[a] = match (t1, t2) {
-        case (Node(a, xs), Node(b, ys)) => if (a == b) equalsHelper(xs, ys) else false
-    }
-
-    def equalsHelper(xs: Forest[a], ys: Forest[a]): Bool with Eq[a] = match (xs, ys) {
+    pub def equals(t1: Tree[a], t2: Tree[a]): Bool with Eq[a] = 
+        def loop(xs, ys) = match (xs, ys) {
             case (Nil, Nil)          => true
-            case (a :: rs1, b:: rs2) => if (a == b) equalsHelper(rs1, rs2) else false
+            case (a :: rs1, b:: rs2) => if (a == b) loop(rs1, rs2) else false
             case _                   => false
+        };
+        match (t1, t2) {
+            case (Node(a, xs), Node(b, ys)) => if (a == b) loop(xs, ys) else false
         }
+
 
 
     pub def ap(f: Tree[a -> b \ ef], t: Tree[a]): Tree[b] \ ef =
@@ -254,7 +255,7 @@ mod RoseTree {
         }
 
 
-    pub def nodeA(mx: f[a], mxs: f[Forest[a]]): f[Tree[a]] with Applicative[f] =
+    def nodeA(mx: f[a], mxs: f[Forest[a]]): f[Tree[a]] with Applicative[f] =
         (((x, xs) -> Node(x, xs)) `Functor.map` mx) `Applicative.ap` mxs
 
     def consA(mx: f[a], mxs: f[List[a]]): f[List[a]] with Applicative[f] =
