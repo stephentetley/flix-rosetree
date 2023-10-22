@@ -64,7 +64,7 @@ mod RoseTree {
 
 
     pub def ap(f: Tree[a -> b \ ef], t: Tree[a]): Tree[b] \ ef =
-        apHelper(f, t, identity)
+        apHelper(f, t, eidentity)
 
     def apHelper(f: Tree[a -> b \ ef], t: Tree[a], k: Tree[b] -> Tree[b] \ ef): Tree[b] \ ef =
         let Node(f1, fs) = f;
@@ -87,7 +87,7 @@ mod RoseTree {
         }
 
     pub def bind(t: Tree[a], f: a -> Tree[b] \ ef): Tree[b] \ ef =
-        bindHelper(t, f, identity)
+        bindHelper(t, f, eidentity)
 
     def bindHelper(t: Tree[a], f: a -> Tree[b] \ ef, k: Tree[b] -> Tree[b] \ ef): Tree[b] \ ef =
         let Node(x1, ts) = t;
@@ -148,7 +148,7 @@ mod RoseTree {
     pub def flatten(x: Tree[a]): List[a] = preorder(x)
 
     pub def preorder(x: Tree[a]): List[a] =
-        preorderHelper(x, identity) |> Chain.toList
+        preorderHelper(x, eidentity) |> Chain.toList
 
     def preorderHelper(x: Tree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
         case Node(a, Nil) => k(Chain.singleton(a))
@@ -161,7 +161,7 @@ mod RoseTree {
     }
 
     pub def postorder(x: Tree[a]): List[a] =
-        postorderHelper(x, identity) |> Chain.toList
+        postorderHelper(x, eidentity) |> Chain.toList
 
 
     def postorderHelper(x: Tree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
@@ -179,7 +179,7 @@ mod RoseTree {
     /// Tree catamorphism
     ///
     pub def foldTree(f: (a, List[b]) -> b, t: Tree[a]): b =
-        foldTreeHelper(f, t, identity)
+        foldTreeHelper(f, t, eidentity)
 
     ///
     /// Helper for `foldTree` in CPS.
@@ -197,7 +197,7 @@ mod RoseTree {
     }
 
     pub def map(f: a -> b \ ef, t: Tree[a]): Tree[b] \ ef =
-        mapHelper(f, t, identity)
+        mapHelper(f, t, eidentity)
 
     def mapHelper(f: a -> b \ ef, t: Tree[a], k: Tree[b] -> Tree[b] \ ef): Tree[b] \ ef = match t {
         case Node(a,xs) => mapForest(f, xs, vs -> k(Node(f(a), vs)))
@@ -220,7 +220,7 @@ mod RoseTree {
     }
 
     pub def unfoldTree(f: b -> (a, List[b]) \ ef, st: b): Tree[a] \ ef=
-        unfoldTreeHelper(f, st,identity)
+        unfoldTreeHelper(f, st, eidentity)
 
     /// CPS
     def unfoldTreeHelper(f: b -> (a, List[b]) \ ef, st: b, k: Tree[a] -> Tree[a] \ ef): Tree[a] \ ef =
@@ -241,10 +241,10 @@ mod RoseTree {
 
 
     pub def sequence(t: Tree[m[a]]): m[Tree[a]] with Applicative[m] =
-        traverse(identity, t)
+        traverse(eidentity, t)
 
     pub def traverse(f: a -> m[b] \ ef, t: Tree[a]): m[Tree[b]] \ ef with Applicative[m] =
-        traverseTree(f, t, identity)
+        traverseTree(f, t, eidentity)
 
 
     /// TODO check the cps transform...
