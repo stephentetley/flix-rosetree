@@ -209,14 +209,14 @@ mod RoseTree {
     }
 
     /// Traversal order is preorder (check...)
-    pub def foreach(f: a -> Unit \ ef, t: Tree[a]): Unit \ ef =
+    pub def foreachTree(f: a -> Unit \ ef, t: Tree[a]): Unit \ ef =
         let Node(a,xs) = t;
         f(a);
         foreachForest(f, xs)
 
     def foreachForest(f: a -> Unit \ ef, ts: Forest[a]): Unit \ ef = match ts {
         case Nil => ()
-        case x :: rs => { foreach(f, x); foreachForest(f, rs) }
+        case x :: rs => { foreachTree(f, x); foreachForest(f, rs) }
     }
 
     pub def unfoldTree(f: b -> (a, List[b]) \ ef, st: b): Tree[a] \ ef=
