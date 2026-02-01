@@ -26,118 +26,116 @@ mod TestRoseTree {
     // drawTree                                                                //
     /////////////////////////////////////////////////////////////////////////////
 
-    @test
-    def drawTree01(): String =
+    @Test
+    def drawTree01(): Unit \ Assert =
         use RoseTree.{drawTree};
         let t1 = Node("a", Nil);
-        drawTree(t1)
+        Assert.assertEq(expected = "a", drawTree(t1) |> String.trimRight)
 
     /////////////////////////////////////////////////////////////////////////////
     // flatten                                                                 //
     /////////////////////////////////////////////////////////////////////////////
 
-    @test
-    def flatten01(): Bool =
+    @Test
+    def flatten01(): Unit \ Assert  =
         use RoseTree.{flatten};
         let t1 = Node("a1", Nil);
-        flatten(t1) == "a1" :: Nil
+        Assert.assertEq(expected = List#{"a1"}, flatten(t1))
 
-    @test
-    def flatten02(): Bool =
+    @Test
+    def flatten02(): Unit \ Assert  =
         use RoseTree.{flatten};
         let t1 = Node("a1", Node("b2", Nil) :: Nil);
-        flatten(t1) == "a1" :: "b2" :: Nil
+        Assert.assertEq(expected = List#{"a1", "b2"}, flatten(t1))
 
-    @test
-    def flatten03(): Bool =
+    @Test
+    def flatten03(): Unit \ Assert  =
         use RoseTree.{flatten};
         let t1 = Node("a1", Node("b2", Nil) :: Node("c2", Nil) :: Nil);
-        flatten(t1) == "a1" :: "b2" :: "c2" :: Nil
+        Assert.assertEq(expected = List#{"a1", "b2", "c2"}, flatten(t1))
 
-    @test
-    def flatten04(): Bool =
+    @Test
+    def flatten04(): Unit \ Assert  =
         use RoseTree.{flatten};
         let t1 = Node("a1", Node("b2", Node("c3", Nil) :: Nil) :: Node("d2", Nil) :: Nil);
-        flatten(t1) == "a1" :: "b2" :: "c3" :: "d2" :: Nil
+        Assert.assertEq(expected = List#{"a1", "b2", "c3", "d2"}, flatten(t1))
 
     /////////////////////////////////////////////////////////////////////////////
     // preorder                                                                //
     /////////////////////////////////////////////////////////////////////////////
 
-    @test
-    def preorder01(): Bool =
+    @Test
+    def preorder01(): Unit \ Assert  =
         use RoseTree.{preorder};
         let t1 = Node(1, Node(2, Node(4, Nil) :: Node(5, Nil) :: Nil) :: Node(3, Nil) :: Nil);
-        preorder(t1) == 1 :: 2 :: 4 :: 5 :: 3 :: Nil
+        Assert.assertEq(expected = List#{1, 2, 4, 5, 3}, preorder(t1))
 
     /////////////////////////////////////////////////////////////////////////////
     // postorder                                                               //
     /////////////////////////////////////////////////////////////////////////////
 
-    @test
-    def postorder01(): Bool =
+    @Test
+    def postorder01(): Unit \ Assert  =
         use RoseTree.{postorder};
         let t1 = Node(1, Node(2, Node(4, Nil) :: Node(5, Nil) :: Nil) :: Node(3, Nil) :: Nil);
-        postorder(t1) == 4 :: 5 :: 2 :: 3 :: 1 :: Nil
+        Assert.assertEq(expected = List#{4, 5, 2, 3, 1}, postorder(t1))
 
     /////////////////////////////////////////////////////////////////////////////
     // foldTree                                                            //
     /////////////////////////////////////////////////////////////////////////////
 
-    def sum(xs: List[Int32]): Int32 = List.foldRightWithCont((x, fy) -> x + fy(), 0, xs)
-
-    @test
-    def foldTree01(): Bool =
+    @Test
+    def foldTree01(): Unit \ Assert =
         use RoseTree.{foldTree};
         let t1 = Node(1, Nil);
-        foldTree((x,xs) -> x + sum(xs), t1) == 1
+        Assert.assertEq(expected = 1, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
-    @test
-    def foldTree02(): Bool =
+    @Test
+    def foldTree02(): Unit \ Assert =
         use RoseTree.{foldTree};
         let t1 = Node(1, Node(2, Nil) :: Nil);
-        foldTree((x,xs) -> x + sum(xs), t1) == 3
+        Assert.assertEq(expected = 3, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
-    @test
-    def foldTree03(): Bool =
+    @Test
+    def foldTree03(): Unit \ Assert =
         use RoseTree.{foldTree};
         let t1 = Node(1, Node(2, Nil) :: Node(3, Nil) :: Nil);
-        foldTree((x,xs) -> x + sum(xs), t1) == 6
+        Assert.assertEq(expected = 6, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
-    @test
-    def foldTree04(): Bool =
+    @Test
+    def foldTree04(): Unit \ Assert =
         use RoseTree.{foldTree};
         let t1 = Node(1, Node(2, Node(3, Nil) :: Nil) :: Node(4, Nil) :: Nil);
-        foldTree((x,xs) -> x + sum(xs), t1) == 10
+        Assert.assertEq(expected = 10, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
     /////////////////////////////////////////////////////////////////////////////
     // map                                                                     //
     /////////////////////////////////////////////////////////////////////////////
 
-    @test
-    def map01(): Bool =
+    @Test
+    def map01(): Unit \ Assert =
         use RoseTree.{map, foldTree};
         let t1 = Node(1, Nil) |> map(x -> x + 1);
-        foldTree((x,xs) -> x + sum(xs), t1) == 2
+        Assert.assertEq(expected = 2, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
-    @test
-    def map02(): Bool =
+    @Test
+    def map02(): Unit \ Assert =
         use RoseTree.{map, foldTree};
         let t1 = Node(1, Node(2, Nil) :: Nil) |> map(x -> x + 1);
-        foldTree((x,xs) -> x + sum(xs), t1) == 5
+        Assert.assertEq(expected = 5, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
 
-    @test
-    def map03(): Bool =
+    @Test
+    def map03(): Unit \ Assert =
         use RoseTree.{map, foldTree};
         let t1 = Node(1, Node(2, Nil) :: Node(3, Nil) :: Nil) |> map(x -> x + 1);
-        foldTree((x,xs) -> x + sum(xs), t1) == 9
+        Assert.assertEq(expected = 9, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
-    @test
-    def map04(): Bool =
+    @Test
+    def map04(): Unit \ Assert =
         use RoseTree.{map, foldTree};
         let t1 = Node(1, Node(2, Node(3, Nil) :: Nil) :: Node(4, Nil) :: Nil) |> map(x -> x + 1);
-        foldTree((x,xs) -> x + sum(xs), t1) == 14
+        Assert.assertEq(expected = 14, foldTree((x,xs) -> x + Foldable.sum(xs), t1))
 
 
 }
