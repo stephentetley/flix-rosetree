@@ -49,61 +49,60 @@ mod RoseTree {
     pub def singleton(x: a): Tree[a] = Node(x, Nil)
 
     ///
-    /// Returns `true` if and only if `c1` and `c2` and equal.
+    /// Returns `true` if and only if `t1` and `t2` and equal.
+    ///
+    /// TODO use of `==` looks suspect...
     ///
     pub def equals(t1: Tree[a], t2: Tree[a]): Bool with Eq[a] = 
         def loop(xs, ys) = match (xs, ys) {
-            case (Nil, Nil)          => true
-            case (a :: rs1, b:: rs2) => if (a == b) loop(rs1, rs2) else false
-            case _                   => false
+            case (Nil, Nil)             => true
+            case (a :: rs1, b :: rs2)   => if (a == b) loop(rs1, rs2) else false
+            case _                      => false
         };
-        match (t1, t2) {
-            case (Node(a, xs), Node(b, ys)) => if (a == b) loop(xs, ys) else false
-        }
+        let Node(a, xs) = t1;
+        let Node(b, ys) = t2;
+        if (a == b) loop(xs, ys) else false
+        
 
 
 
     pub def ap(f: Tree[a -> b \ ef], t: Tree[a]): Tree[b] \ ef =
-        apHelper(f, t, eidentity)
+        def loopTree(tf, tx, ktree) = {
+            def loopList1(f1, ts, klist1) = {
+                match ts {
+                    case Nil => klist1(Nil)
+                    case t1 :: rs => loopList1(f1, rs, ks -> klist1(map(f1, t1) :: ks))
+                }
+            };
+            def loopList2(t1, fs, klist2) = match fs {
+                case Nil => klist2(Nil)
+                case fn1 :: rs => loopList2(t1, rs, ks ->
+                                    loopTree(fn1, t1, k1 ->
+                                        klist2(k1 :: ks)))
+            };
+            let Node(f1, fs) = tf;
+            let Node(x1, ts) = tx;
+            loopList1(f1, ts, ks1 ->
+                loopList2(tx, fs, ks2 -> ktree(Node(f1(x1), ks1 ::: ks2))))
+        };
+        loopTree(f, t, eidentity)
 
-    def apHelper(f: Tree[a -> b \ ef], t: Tree[a], k: Tree[b] -> Tree[b] \ ef): Tree[b] \ ef =
-        let Node(f1, fs) = f;
-        let Node(x1, ts) = t;
-        apHelperList1(f1, ts, ks1 ->
-            apHelperList2(t, fs, ks2 -> k(Node(f1(x1), ks1 ::: ks2))))
 
-    def apHelperList1(f1: a -> b \ ef, ts: List[Tree[a]], k: List[Tree[b]] -> Tree[b] \ ef): Tree[b] \ ef =
-        match ts {
-            case Nil => k(Nil)
-            case t1 :: rs => apHelperList1(f1, rs, ks -> k(map(f1, t1) :: ks))
-        }
 
-    def apHelperList2(t: Tree[a], fs: List[Tree[a -> b \ ef]], k: List[Tree[b]] -> Tree[b] \ ef): Tree[b] \ ef =
-        match fs {
-            case Nil => k(Nil)
-            case f1 :: rs => apHelperList2(t, rs, ks ->
-                                apHelper(f1, t, k1 ->
-                                    k(k1 :: ks)))
-        }
+    pub def flatMap(f: a -> Tree[b] \ ef, t: Tree[a]): Tree[b] \ ef =
+        def loopTree(t1, ktree) = {
+            def loopList(xs, klist) = match xs {
+                case Nil => klist(Nil)
+                case x1 :: rs => loopTree(x1, k1 ->
+                                    loopList(rs, ks ->
+                                        klist(k1 :: ks)))
+            };
+            let Node(x1, ts) = t1;
+            let Node(x2, ts2)  = f(x1);
+            loopList(ts, ks -> ktree(Node(x2, ts2 ::: ks)))
+        };
+        loopTree(t, eidentity)
 
-    pub def bind(t: Tree[a], f: a -> Tree[b] \ ef): Tree[b] \ ef =
-        bindHelper(t, f, eidentity)
-
-    def bindHelper(t: Tree[a], f: a -> Tree[b] \ ef, k: Tree[b] -> Tree[b] \ ef): Tree[b] \ ef =
-        let Node(x1, ts) = t;
-        match f(x1) {
-            case Node(x2, ts2) => bindHelperList(ts, f, ks -> k(Node(x2, ts2 ::: ks)))
-        }
-
-    def bindHelperList(l: List[Tree[a]], f: a -> Tree[b] \ ef, k: List[Tree[b]] -> Tree[b] \ ef): Tree[b] \ ef =
-        match l {
-            case Nil => k(Nil)
-            case t1 :: rs => bindHelper(t1, f, k1 ->
-                                bindHelperList(rs, f, ks ->
-                                    k(k1 :: ks)))
-        }
-
-    pub def flatMap(f: a -> Tree[b] \ ef, t: Tree[a]) : Tree[b] \ ef = bind(t, f)
 
     pub def drawTree(x: Tree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
 
@@ -179,22 +178,16 @@ mod RoseTree {
     /// Tree catamorphism
     ///
     pub def foldTree(f: (a, List[b]) -> b, t: Tree[a]): b =
-        foldTreeHelper(f, t, eidentity)
+        def loopTree(x, ktree) = {
+            def loopList(ts, klist) = match ts {
+                case Nil => klist(Nil)
+                case t1 :: rs => loopTree(t1, v -> loopList(rs, vs -> klist(v :: vs)))
+            };
+            let Node(x1, kids) = x;
+            loopList(kids, vs -> ktree(f(x1,vs)))
+        };
+        loopTree(t, eidentity)
 
-    ///
-    /// Helper for `foldTree` in CPS.
-    ///
-    def foldTreeHelper(f: (a, List[b]) -> b, t: Tree[a], k: b -> b): b = match t {
-        case Node(x,kids) => foldForest(f, kids, vs -> k(f(x,vs)))
-    }
-
-    ///
-    /// Helper for `foldTree` in CPS.
-    ///
-    def foldForest(f: (a, List[b]) -> b, ts: Forest[a], k: List[b] -> b): b = match ts {
-        case Nil => k(Nil)
-        case x :: rs => foldTreeHelper(f, x, v -> foldForest(f, rs, vs -> k(v :: vs)))
-    }
 
     pub def map(f: a -> b \ ef, t: Tree[a]): Tree[b] \ ef =
         def loopTree(t1, ktree) = {
@@ -215,7 +208,7 @@ mod RoseTree {
         f(a);
         foreachForest(f, xs)
 
-    def foreachForest(f: a -> Unit \ ef, ts: Forest[a]): Unit \ ef = match ts {
+    pub def foreachForest(f: a -> Unit \ ef, ts: Forest[a]): Unit \ ef = match ts {
         case Nil => ()
         case x :: rs => { foreachTree(f, x); foreachForest(f, rs) }
     }
