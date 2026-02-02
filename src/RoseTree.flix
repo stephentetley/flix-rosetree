@@ -148,31 +148,31 @@ mod RoseTree {
     pub def flatten(x: Tree[a]): List[a] = preorder(x)
 
     pub def preorder(x: Tree[a]): List[a] =
-        preorderHelper(x, eidentity) |> Chain.toList
+        def loopTree(x1, ktree) = {
+            def loopList(ts, klist) = match ts {
+                case Nil     => klist(Chain.empty())
+                case t :: rs => loopTree(t, vs1 -> loopList(rs, vs2 -> klist(Chain.append(vs1, vs2))))
+            };
+            match x1 {
+                case Node(a, Nil) => ktree(Chain.singleton(a))
+                case Node(a, xs)  => loopList(xs, vs -> ktree(Chain.cons(a, vs)))
+            }
+        };
+        loopTree(x, eidentity) |> Chain.toList
 
-    def preorderHelper(x: Tree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
-        case Node(a, Nil) => k(Chain.singleton(a))
-        case Node(a, xs)  => preorderForest(xs, vs -> k(Chain.cons(a, vs)))
-    }
-
-    def preorderForest(xs: Forest[a], k: Chain[a] -> Chain[a]): Chain[a] = match xs {
-        case Nil     => k(Chain.empty())
-        case x :: rs => preorderHelper(x, vs1 -> preorderForest(rs, vs2 -> k(Chain.append(vs1, vs2))))
-    }
 
     pub def postorder(x: Tree[a]): List[a] =
-        postorderHelper(x, eidentity) |> Chain.toList
-
-
-    def postorderHelper(x: Tree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
-        case Node(a, Nil) => k(Chain.singleton(a))
-        case Node(a, xs)  => postorderForest(xs, vs -> k(Chain.snoc(vs, a)))
-    }
-
-    def postorderForest(xs: Forest[a], k: Chain[a] -> Chain[a]): Chain[a] = match xs {
-        case Nil => k(Chain.empty())
-        case x :: rs => postorderHelper(x, vs1 -> postorderForest(rs, vs2 -> k(Chain.append(vs1, vs2))))
-    }
+        def loopTree(x1, ktree) = {
+            def loopList(ts, klist) = match ts {
+                case Nil => klist(Chain.empty())
+                case t1 :: rs => loopTree(t1, vs1 -> loopList(rs, vs2 -> klist(Chain.append(vs1, vs2))))
+            };
+            match x1 {
+                case Node(a, Nil) => ktree(Chain.singleton(a))
+                case Node(a, xs)  => loopList(xs, vs -> ktree(Chain.snoc(vs, a)))
+            }
+        };
+        loopTree(x, eidentity) |> Chain.toList
 
 
     ///
