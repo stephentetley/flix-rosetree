@@ -197,16 +197,17 @@ mod RoseTree {
     }
 
     pub def map(f: a -> b \ ef, t: Tree[a]): Tree[b] \ ef =
-        mapHelper(f, t, eidentity)
+        def loopTree(t1, ktree) = {
+            def loopList(ts, klist) = match ts {
+                case Nil     => klist(Nil)
+                case x :: rs => loopTree(x, v1 -> loopList(rs, vs -> klist(v1 :: vs)))
+            };
+            let Node(a, xs) = t1;
+            loopList(xs, vs -> ktree(Node(f(a), vs)))
+        };
+        loopTree(t, eidentity)
 
-    def mapHelper(f: a -> b \ ef, t: Tree[a], k: Tree[b] -> Tree[b] \ ef): Tree[b] \ ef = match t {
-        case Node(a,xs) => mapForest(f, xs, vs -> k(Node(f(a), vs)))
-    }
 
-    def mapForest(f: a -> b \ ef, ts: Forest[a], k: Forest[b] -> Tree[b] \ ef): Tree[b] \ ef = match ts {
-        case Nil     => k(Nil)
-        case x :: rs => mapHelper(f, x, v1 -> mapForest(f, rs, vs -> k(v1 :: vs)))
-    }
 
     /// Traversal order is preorder (check...)
     pub def foreachTree(f: a -> Unit \ ef, t: Tree[a]): Unit \ ef =
@@ -219,21 +220,17 @@ mod RoseTree {
         case x :: rs => { foreachTree(f, x); foreachForest(f, rs) }
     }
 
-    pub def unfoldTree(f: b -> (a, List[b]) \ ef, st: b): Tree[a] \ ef=
-        unfoldTreeHelper(f, st, eidentity)
-
-    /// CPS
-    def unfoldTreeHelper(f: b -> (a, List[b]) \ ef, st: b, k: Tree[a] -> Tree[a] \ ef): Tree[a] \ ef =
-        let (a, bs) = f(st);
-        unfoldTreeListHelper(f, bs, ks -> k(Node(a, ks)))
-
-    /// CPS
-    def unfoldTreeListHelper(f: b -> (a, List[b]) \ ef, ss: List[b], k: Forest[a] -> Tree[a] \ ef): Tree[a] \ ef =
-        match ss {
-            case Nil => k(Nil)
-            case s :: rs => unfoldTreeHelper(f, s, k1 ->
-                                unfoldTreeListHelper(f, rs, ks -> k(k1 :: ks)))
-        }
+    pub def unfoldTree(f: b -> (a, List[b]) \ ef, st: b): Tree[a] \ ef =
+        def loopTree(st1, ktree) = {
+            def loopList(ss, klist) = match ss {
+                case Nil => klist(Nil)
+                case s :: rs => loopTree(s, k1 ->
+                                    loopList(rs, ks -> klist(k1 :: ks)))
+                };
+            let (a, bs) = f(st1);
+            loopList(bs, ks -> ktree(Node(a, ks)))
+        };
+        loopTree(st, eidentity)
 
 
     pub def unfoldForest(f: b -> (a, List[b]) \ ef, ss: List[b]): Forest[a] \ ef =
