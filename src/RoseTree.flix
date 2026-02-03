@@ -109,45 +109,44 @@ mod RoseTree {
         loopTree(t, eidentity)
 
 
-    pub def drawTree(x: Tree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
+    pub def drawTree(t: Tree[String]): String = 
+        def shift1(first1, other1, xs1, kshift1) = {
+            def shift2(other2, xs2, kshift2) = match xs2 {
+                case Nil        => kshift2(Nil)
+                case x1 :: rs => {
+                    let s1 = other2 + x1;
+                    shift2(other2, rs, ss -> kshift2(s1 :: ss))
+                }
+            };
+            match xs1 {
+               case Nil => kshift1(Nil)
+                case x1 :: rs => {
+                    let s1 = first1 + x1;
+                    shift2(other1, rs, ss -> kshift1(s1 :: ss))
+                }
+            }
+        };
+        def loopTree(x, ktree) = {
+            def loopList(xs, klist) =
+                match xs {
+                    case Nil       => klist(Nil)
+                    case t1 :: Nil => 
+                        loopTree(t1, ac1 -> shift1("`- ", "   ", ac1, ac2 -> klist("|" :: ac2)))
+
+                    case t1 :: rs  => 
+                        loopTree(t1, ac1 -> shift1("+- ", "|  ", ac1, ac2 -> 
+                            loopList(rs, ac3 -> klist("|" :: (ac2 ::: ac3)))))
+                };
+            match x {
+                case Node(label, kids) => {
+                    let xs = String.lines(label);
+                    loopList(kids, ys -> ktree(xs ::: ys))
+                }
+            }
+        };
+        loopTree(t, xs -> xs) |> String.unlines
 
     pub def drawForest(x: Forest[String]): String = String.unlines(List.map(drawTree, x))
-
-    def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] =
-        match xs {
-            case Nil => k(Nil)
-            case x :: rs => {
-                let s1 = first + x;
-                shift2(other, rs, ss -> k(s1 :: ss))
-            }
-        }
-
-    def shift2(other: String, xs: List[String], k: List[String] -> List[String]): List[String] =
-        match xs {
-            case Nil => k(Nil)
-            case x :: rs => {
-                let s1 = other + x;
-                shift2(other, rs, ss -> k(s1 :: ss))
-            }
-        }
-
-
-    def drawTree1(x: Tree[String], k: List[String] -> List[String]): List[String] =
-        match x {
-            case Node(label, kids) => {
-                let xs = String.lines(label);
-                drawKids(kids, ys -> k(xs ::: ys))
-            }
-        }
-
-    def drawKids(xs: List[Tree[String]], k: List[String] -> List[String]): List[String] =
-        match xs {
-            case Nil       => k(Nil)
-            case t1 :: Nil => drawTree1(t1, ac1 -> shift1("`- ", "   ", ac1, ac2 -> k("|" :: ac2)))
-            case t1 :: rs  => drawTree1(t1, ac1 -> shift1("+- ", "|  ", ac1, ac2 -> drawKids(rs, ac3 -> k("|" :: (ac2 ::: ac3)))))
-        }
-
-
 
     pub def flatten(x: Tree[a]): List[a] = preorder(x)
 

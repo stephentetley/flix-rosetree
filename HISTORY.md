@@ -1,5 +1,6 @@
 ### v0.3.0
-   Reducing use of separately defined helper functions.
+   Updated to use recursive nested defs rather than separately defined helper 
+   functions.
 
 ### v0.2.0
    Renamed `foreach` to `foreachTree`. Thanks Herluf.
