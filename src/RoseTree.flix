@@ -45,23 +45,28 @@ mod RoseTree {
 
 
 
-
+    ///
+    /// Create a tree with a single node.
+    ///
     pub def singleton(x: a): Tree[a] = Node(x, Nil)
 
     ///
     /// Returns `true` if and only if `t1` and `t2` and equal.
     ///
-    /// TODO use of `==` looks suspect...
-    ///
     pub def equals(t1: Tree[a], t2: Tree[a]): Bool with Eq[a] = 
-        def loop(xs, ys) = match (xs, ys) {
-            case (Nil, Nil)             => true
-            case (a :: rs1, b :: rs2)   => if (a == b) loop(rs1, rs2) else false
-            case _                      => false
+        def loopTree(x1, y1, ktree) = {
+            def loopList(xs, ys, klist) = match (xs, ys) {
+                case (a1 :: rs1, a2 :: rs2) => 
+                    loopTree(a1, a2, kb -> 
+                        if (kb) loopList(rs1, rs2, klist) else klist(false))
+                case (Nil, Nil)             => klist(true)
+                case (_, _)                 => klist(false)
+            };
+            let Node(a, ks1) = x1;
+            let Node(b, ks2) = y1;
+            if (a == b) loopList(ks1, ks2, ktree) else ktree(false)
         };
-        let Node(a, xs) = t1;
-        let Node(b, ys) = t2;
-        if (a == b) loop(xs, ys) else false
+        loopTree(t1, t2, eidentity)
         
 
 

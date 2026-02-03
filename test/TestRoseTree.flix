@@ -23,6 +23,29 @@ mod TestRoseTree {
     use RoseTree.Tree.{Node};
 
     /////////////////////////////////////////////////////////////////////////////
+    // equals                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @Test
+    def equals01(): Unit \ Assert  =
+        let t1 = Node("a1", Nil);
+        let t2 = Node("a1", Nil);
+        Assert.assertEq(expected = true, t1 == t2)
+
+    @Test
+    def equals02(): Unit \ Assert  =
+        let t1 = Node("a1", Nil);
+        let t2 = Node("a1", Node("b2", Nil) :: Nil);
+        Assert.assertEq(expected = false, t1 == t2)
+
+    @Test
+    def equals03(): Unit \ Assert  =
+        let t1 = Node("a1", Node("b2", Nil) :: Nil);
+        let t2 = Node("a1", Node("b2", Nil) :: Nil);
+        Assert.assertEq(expected = true, t1 == t2)
+
+
+    /////////////////////////////////////////////////////////////////////////////
     // drawTree                                                                //
     /////////////////////////////////////////////////////////////////////////////
 
