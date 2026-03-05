@@ -15,7 +15,7 @@
  */
 
 
-mod RoseTree {
+pub mod RoseTree {
 
     use RoseTree.Tree
     use RoseTree.Tree.{Node}
