@@ -1,3 +1,6 @@
+### v0.4.0
+   Updated to use new package definition.
+
 ### v0.3.0
    Updated to use recursive nested defs rather than separately defined helper 
    functions.
